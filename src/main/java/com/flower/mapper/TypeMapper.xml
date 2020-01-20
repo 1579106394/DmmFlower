@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.flower.mapper.TypeMapper">
+
+    <resultMap id="Type" type="type">
+        <id column="type_id" property="typeId" />
+        <result column="type_name" property="typeName" />
+        <result column="type_num" property="typeNum" />
+        <result column="type_flag" property="typeFlag" />
+    </resultMap>
+
+    <select id="getTypeList" parameterType="page" resultMap="Type">
+        select * from type
+        where type_flag = 1
+        limit #{index}, #{currentCount}
+    </select>
+
+    <select id="getTypeCount" parameterType="page" resultType="Integer">
+        select count(*) from type
+        where type_flag = 1
+    </select>
+
+    <select id="getTypeById" resultMap="Type">
+        select * from type
+        where type_flag = 1
+        and type_id = #{value}
+    </select>
+
+    <delete id="deleteTypeById">
+        delete from type
+        where type_id = #{value}
+    </delete>
+
+    <insert id="addType" parameterType="type">
+        insert into type values
+        (
+          #{typeId}, #{typeName}, #{typeNum}, #{typeFlag}
+        )
+    </insert>
+
+    <update id="editType" parameterType="type">
+        update type set
+        type_name = #{typeName}
+        <if test="typeNum != null and typeNum != ''">
+            ,type_num = #{typeNum}
+        </if>
+        where type_id = #{typeId}
+    </update>
+
+    <select id="getAllTypeList" resultMap="Type">
+        select * from type
+        where type_flag = 1
+    </select>
+
+    <select id="getTypeByFlowerId" resultMap="Type">
+        select * from type
+        inner join flower
+        on flower_type = type_id
+        where type_flag = 1
+        and flower_id = #{value}
+    </select>
+
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.flower.mapper.LogMapper">
+
+    <resultMap id="Log" type="log">
+        <id column="log_id" property="logId" />
+        <result column="log_created_time" property="logCreatedTime" />
+        <result column="log_article" property="logArticle" />
+        <result column="log_flag" property="logFlag" />
+    </resultMap>
+
+    <insert id="addLog" parameterType="log">
+        insert into log values
+        (
+          #{logId}, #{logCreatedTime},
+          #{logArticle}, #{logFlag}
+        )
+    </insert>
+
+    <select id="getLogList" parameterType="page" resultMap="Log">
+        select * from log
+        where log_flag = 1
+        <if test="params != null">
+            <if test="params.staffName != null and params.staffName != ''">
+                and log_article like '%${params.staffName}%'
+            </if>
+        </if>
+        order by log_created_time desc
+        limit #{index}, #{currentCount}
+    </select>
+
+    <select id="getLogCount" parameterType="page" resultType="Integer">
+        select count(*) from log
+        where log_flag = 1
+        <if test="params != null">
+            <if test="params.staffName != null and params.staffName != ''">
+                and log_article like '%${params.staffName}%'
+            </if>
+        </if>
+    </select>
+
+    <delete id="deleteLogById">
+        delete from log
+        where log_id = #{value}
+    </delete>
+
+</mapper>

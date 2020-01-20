@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.flower.mapper.CartMapper">
+
+    <resultMap id="Cart" type="cart">
+        <id column="cart_id" property="cartId" />
+        <result column="cart_created_time" property="cartCreatedTime" />
+        <result column="cart_flag" property="cartFlag" />
+        <association property="staff" javaType="staff">
+            <id column="staff_id" property="staffId"/>
+            <result column="staff_name" property="staffName"/>
+            <result column="staff_account" property="staffAccount"/>
+            <result column="staff_password" property="staffPassword"/>
+            <result column="staff_birth" property="staffBirth"/>
+            <result column="staff_point" property="staffPoint"/>
+            <result column="staff_sex" property="staffSex"/>
+            <result column="staff_age" property="staffAge"/>
+            <result column="staff_telephone" property="staffTelephone"/>
+            <result column="staff_role" property="staffRole"/>
+            <result column="staff_flag" property="staffFlag"/>
+        </association>
+        <collection property="flowerList" ofType="flower">
+            <id column="flower_id" property="flowerId"/>
+            <result column="flower_name" property="flowerName"/>
+            <result column="flower_created_time" property="flowerCreatedTime"/>
+            <result column="flower_price" property="flowerPrice"/>
+            <result column="flower_img" property="flowerImg"/>
+            <result column="flower_article" property="flowerArticle"/>
+            <result column="flower_num" property="flowerNum"/>
+            <result column="flower_flag" property="flowerFlag"/>
+        </collection>
+    </resultMap>
+
+    <select id="getCartByStaff" parameterType="staff" resultMap="Cart">
+        select * from cart
+        where cart_staff = #{staffId}
+        and cart_flag = 1
+    </select>
+
+    <insert id="creatCart" parameterType="cart">
+        insert into cart values
+        (
+          #{cartId}, #{staff.staffId},
+          #{cartCreatedTime}, #{cartFlag}
+        )
+    </insert>
+
+    <insert id="addCart" parameterType="map">
+        insert into flower_cart values
+        (
+          #{flowerCartId}, #{flowerId},
+          #{cartId}, #{flowerNum}
+        )
+    </insert>
+
+    <select id="getCartList" parameterType="staff" resultMap="Cart">
+        select
+        c.cart_id ,f.flower_id, f.flower_name, f.flower_price,
+        fc.flower_num
+        from cart c,flower f,flower_cart fc
+        where c.cart_id = fc.cart_id
+        and f.flower_id = fc.flower_id
+        and c.cart_staff = #{staffId}
+        and c.cart_flag = 1
+    </select>
+
+    <delete id="deleteFromCart">
+        delete from flower_cart
+        where flower_id = #{0}
+        and cart_id = #{1}
+    </delete>
+
+</mapper>

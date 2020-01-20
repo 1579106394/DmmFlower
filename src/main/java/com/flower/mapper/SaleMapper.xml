@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.flower.mapper.SaleMapper">
+
+    <resultMap id="Sale" type="sale">
+        <id column="sale_id" property="saleId" />
+        <result column="sale_created_time" property="saleCreatedTime" />
+        <result column="sale_num" property="saleNum" />
+        <result column="sale_flag" property="saleFlag" />
+        <association property="flower" javaType="flower">
+            <id column="flower_id" property="flowerId"/>
+            <result column="flower_name" property="flowerName"/>
+            <result column="flower_created_time" property="flowerCreatedTime"/>
+            <result column="flower_img" property="flowerImg"/>
+            <result column="flower_article" property="flowerArticle"/>
+            <result column="flower_price" property="flowerPrice"/>
+        </association>
+    </resultMap>
+
+    <insert id="addSale" parameterType="sale">
+        insert into sale values
+        (
+          #{saleId}, #{flower.flowerId},
+          #{saleCreatedTime}, #{saleNum}, #{saleFlag}
+        )
+    </insert>
+
+    <select id="getSaleList" parameterType="page" resultMap="Sale">
+        select * from sale
+        left join flower on flower_id = sale_flower
+        where sale_flag = 1
+        <if test="params != null">
+            <if test="params.flowerName != null and params.flowerName != null">
+                and flower_name like '%${params.flowerName}%'
+            </if>
+        </if>
+        order by sale_created_time desc
+        limit #{index}, #{currentCount}
+    </select>
+
+    <select id="getSaleCount" parameterType="page" resultType="Integer">
+        select count(*) from sale
+        left join flower on flower_id = sale_flower
+        where sale_flag = 1
+        <if test="params != null">
+            <if test="params.flowerName != null and params.flowerName != null">
+                and flower_name like '%${params.flowerName}%'
+            </if>
+        </if>
+    </select>
+
+    <delete id="deleteSaleById">
+        delete from sale
+        where sale_id = #{value}
+    </delete>
+
+    <select id="getAllSale" resultMap="Sale">
+        SELECT
+            f.flower_name flower_name,
+            sum(s.sale_num) sale_num
+        FROM
+            sale s
+        INNER JOIN flower f ON s.sale_flower = f.flower_id
+        GROUP BY
+            f.flower_name
+    </select>
+
+    <select id="getSaleNum" resultType="Integer">
+    SELECT sum(sale_num) from sale
+    left join flower on flower_id = sale_flower
+    where sale_flag = 1
+    </select>
+
+
+</mapper>

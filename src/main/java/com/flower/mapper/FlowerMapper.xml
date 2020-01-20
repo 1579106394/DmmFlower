@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.flower.mapper.FlowerMapper">
+
+    <resultMap id="Flower" type="flower">
+        <id column="flower_id" property="flowerId"/>
+        <result column="flower_name" property="flowerName"/>
+        <result column="flower_created_time" property="flowerCreatedTime"/>
+        <result column="flower_price" property="flowerPrice"/>
+        <result column="flower_num" property="flowerNum"/>
+        <result column="flower_img" property="flowerImg"/>
+        <result column="flower_article" property="flowerArticle"/>
+        <result column="flower_flag" property="flowerFlag"/>
+        <association property="staff" javaType="staff">
+            <id column="staff_id" property="staffId"/>
+            <result column="staff_name" property="staffName"/>
+            <result column="staff_account" property="staffAccount"/>
+            <result column="staff_password" property="staffPassword"/>
+            <result column="staff_point" property="staffPoint"/>
+            <result column="staff_birth" property="staffBirth"/>
+            <result column="staff_sex" property="staffSex"/>
+            <result column="staff_age" property="staffAge"/>
+            <result column="staff_telephone" property="staffTelephone"/>
+            <result column="staff_role" property="staffRole"/>
+            <result column="staff_flag" property="staffFlag"/>
+        </association>
+        <association property="type" javaType="type">
+            <id column="type_id" property="typeId" />
+            <result column="type_name" property="typeName" />
+            <result column="type_flag" property="typeFlag" />
+        </association>
+    </resultMap>
+
+    <insert id="addFlower" parameterType="flower">
+        insert into flower values
+        (
+          #{flowerId}, #{flowerName}, #{flowerCreatedTime},
+          #{staff.staffId}, #{flowerPrice},
+          #{flowerNum}, #{flowerFlag}, #{type.typeId},
+          #{flowerImg}, #{flowerArticle}
+        )
+    </insert>
+
+    <select id="getFlowerList" parameterType="page" resultMap="Flower">
+        select * from flower left join staff
+        on staff_id = flower_created_staff
+        inner join type
+        on type_id = flower_type
+        where flower_flag = 1
+        <if test="params != null">
+            <if test="params.flowerName != null and params.flowerName != ''">
+                and flower_name like '%${params.flowerName}%'
+            </if>
+            <if test="params.typeId != null and params.typeId != ''">
+                and type_id = #{params.typeId}
+            </if>
+        </if>
+        order by flower_created_time desc
+        limit #{index}, #{currentCount}
+    </select>
+
+    <select id="getFlowerCount" parameterType="page" resultType="Integer">
+        select count(flower_id) from flower left join staff
+        on staff_id = flower_created_staff
+        inner join type
+        on type_id = flower_type
+        where flower_flag = 1
+        <if test="params != null">
+            <if test="params.flowerName != null and params.flowerName != ''">
+                and flower_name like '%${params.flowerName}%'
+            </if>
+            <if test="params.typeId != null and params.typeId != ''">
+                and type_id = #{params.typeId}
+            </if>
+        </if>
+    </select>
+
+    <delete id="deleteFlowerById">
+        delete from flower
+        where flower_id = #{value}
+    </delete>
+
+    <update id="editFlower" parameterType="Flower">
+        update flower set
+        flower_created_time = #{flowerCreatedTime}
+        <if test="flowerName != null and flowerName != ''">
+            ,flower_name = #{flowerName}
+        </if>
+        <if test="flowerPrice != null and flowerPrice != ''">
+            ,flower_price = #{flowerPrice}
+        </if>
+        <if test="flowerNum != null and flowerNum != ''">
+            ,flower_num = #{flowerNum}
+        </if>
+        <if test="staff != null">
+            ,flower_created_staff = #{staff.staffId}
+        </if>
+        <if test="type != null">
+            ,flower_type = #{type.typeId}
+        </if>
+        <if test="flowerImg != null and flowerImg != ''">
+            ,flower_img = #{flowerImg}
+        </if>
+        <if test="flowerArticle != null and flowerArticle != ''">
+            ,flower_article = #{flowerArticle}
+        </if>
+
+        where flower_id = #{flowerId}
+    </update>
+
+    <select id="getFlowerById" resultMap="Flower">
+        select * from flower
+        inner join type
+        on type_id = flower_type
+        where flower_flag = 1
+        and flower_id = #{value}
+    </select>
+
+    <select id="getFlowerFromCartByFlowerId" parameterType="flower" resultMap="Flower">
+        select * from cart c, flower_cart fc, flower f
+        inner join type
+        on type_id = f.flower_type
+        where f.flower_id = fc.flower_id
+        and c.cart_id = fc.cart_id
+        and f.flower_id = #{flowerId}
+        and c.cart_staff = #{staff.staffId}
+    </select>
+
+    <select id="getAllFlowerById" resultMap="Flower">
+      select * from flower
+      inner join type
+        on type_id = flower_type
+      where flower_flag = 1
+    </select>
+
+</mapper>

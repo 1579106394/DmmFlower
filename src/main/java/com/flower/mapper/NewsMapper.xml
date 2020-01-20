@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.flower.mapper.NewsMapper">
+
+    <resultMap id="News" type="news">
+        <id column="news_id" property="newsId" />
+        <result column="news_title" property="newsTitle" />
+        <result column="news_article" property="newsArticle" />
+        <result column="news_created_time" property="newsCreatedTime" />
+        <result column="news_read_num" property="newsReadNum" />
+        <result column="news_flag" property="newsFlag" />
+        <association property="staff" javaType="staff">
+            <id column="staff_id" property="staffId"/>
+            <result column="staff_name" property="staffName"/>
+            <result column="staff_account" property="staffAccount"/>
+            <result column="staff_password" property="staffPassword"/>
+            <result column="staff_birth" property="staffBirth"/>
+            <result column="staff_sex" property="staffSex"/>
+            <result column="staff_age" property="staffAge"/>
+            <result column="staff_point" property="staffPoint"/>
+            <result column="staff_telephone" property="staffTelephone"/>
+            <result column="staff_role" property="staffRole"/>
+            <result column="staff_flag" property="staffFlag"/>
+        </association>
+    </resultMap>
+
+
+    <select id="getNewsList" parameterType="page" resultMap="News">
+        select * from news
+        inner join staff on
+        staff_id = news_staff
+        where news_flag = 1
+        <if test="params != null">
+            and news_article like '%${params.newsArticle}%'
+        </if>
+        order by news_created_time desc
+        limit #{index}, #{currentCount}
+    </select>
+
+    <select id="getNewsCount" parameterType="page" resultType="Integer">
+        select count(*) from news
+        inner join staff on
+        staff_id = news_staff
+        where news_flag = 1
+        <if test="params != null">
+            and news_article like '%${params.newsArticle}%'
+        </if>
+
+    </select>
+
+    <insert id="addNews" parameterType="news">
+        insert into news values
+        (
+          #{newsId}, #{staff.staffId}, #{newsTitle},
+          #{newsArticle}, #{newsCreatedTime},
+          #{newsReadNum}, #{newsFlag}
+        )
+    </insert>
+
+    <select id="getNewsById" resultMap="News">
+        select * from news
+        inner join staff on
+        staff_id = news_staff
+        where news_id = #{value}
+    </select>
+
+    <delete id="deleteNewsById">
+        delete from news
+        where news_id = #{value}
+    </delete>
+
+    <update id="editNews" parameterType="news">
+        update news set
+        news_title = #{newsTitle}
+        ,news_article = #{newsArticle}
+        ,news_created_time = #{newsCreatedTime}
+        ,news_read_num = #{newsReadNum}
+        where news_id = #{newsId}
+    </update>
+
+</mapper>
